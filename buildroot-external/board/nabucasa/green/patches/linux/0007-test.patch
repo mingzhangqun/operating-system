@@ -1,0 +1,37 @@
+diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
+index a491280ca..f36a117d1 100644
+--- a/drivers/gpu/drm/drm_edid.c
++++ b/drivers/gpu/drm/drm_edid.c
+@@ -6913,7 +6913,9 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
+ 
+ 	update_display_info(connector, drm_edid);
+ 
+-	return _drm_edid_connector_add_modes(connector, drm_edid);
++	int edid_mode = _drm_edid_connector_add_modes(connector, drm_edid);
++	printk("INFO: %s,%d: edid_mode=%d\n", __func__, __LINE__, edid_mode);
++	return edid_mode;//_drm_edid_connector_add_modes(connector, drm_edid);
+ }
+ EXPORT_SYMBOL(drm_add_edid_modes);
+ 
+@@ -6962,6 +6964,7 @@ int drm_add_modes_noedid(struct drm_connector *connector,
+ 			num_modes++;
+ 		}
+ 	}
++	printk("INFO: %s,%d: num_modes=%d\n", __func__, __LINE__, num_modes);
+ 	return num_modes;
+ }
+ EXPORT_SYMBOL(drm_add_modes_noedid);
+diff --git a/drivers/video/fbdev/core/fbmon.c b/drivers/video/fbdev/core/fbmon.c
+index 79e5bfbdd..fc17f2e80 100644
+--- a/drivers/video/fbdev/core/fbmon.c
++++ b/drivers/video/fbdev/core/fbmon.c
+@@ -39,7 +39,8 @@
+  * EDID parser
+  */
+ 
+-#undef DEBUG  /* define this for verbose EDID parsing output */
++//#undef DEBUG  /* define this for verbose EDID parsing output */
++#define DEBUG
+ 
+ #ifdef DEBUG
+ #define DPRINTK(fmt, args...) printk(fmt,## args)

@@ -8,7 +8,7 @@ function create_ota_update() {
     local rauc_folder="${BINARIES_DIR}/rauc"
     local boot="${BINARIES_DIR}/boot.vfat"
     local kernel="${BINARIES_DIR}/kernel.img"
-    local rootfs="${BINARIES_DIR}/rootfs.squashfs"
+    local rootfs="${BINARIES_DIR}/rootfs.ext4"
     local spl="${BINARIES_DIR}/spl.img"
     local key="/build/key.pem"
     local cert="/build/cert.pem"

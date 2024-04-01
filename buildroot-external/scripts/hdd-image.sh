@@ -11,7 +11,7 @@ OVERLAY_UUID="f1326040-5236-40eb-b683-aaa100a9afcf"
 DATA_UUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
 
 BOOTSTATE_SIZE=8M
-SYSTEM_SIZE=256M
+SYSTEM_SIZE=800M
 KERNEL_SIZE=24M
 OVERLAY_SIZE=96M
 DATA_SIZE=1280M
@@ -139,7 +139,7 @@ function _create_disk_gpt() {
     local data_img="$(path_data_img)"
     local kernel_img="$(path_kernel_img)"
     local hdd_img="$(hassos_image_name img)"
-    local hdd_count=${DISK_SIZE:-2}
+    local hdd_count=${DISK_SIZE:-3}
 
     local boot_offset=0
     local rootfs_offset=0
