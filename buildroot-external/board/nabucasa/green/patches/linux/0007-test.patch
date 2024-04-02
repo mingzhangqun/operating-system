@@ -1,31 +1,109 @@
+diff --git a/drivers/gpu/drm/bridge/display-connector.c b/drivers/gpu/drm/bridge/display-connector.c
+index 08bd5695d..2b85ddc3e 100644
+--- a/drivers/gpu/drm/bridge/display-connector.c
++++ b/drivers/gpu/drm/bridge/display-connector.c
+@@ -397,7 +397,7 @@ static void display_connector_remove(struct platform_device *pdev)
+ 		i2c_put_adapter(conn->bridge.ddc);
+ }
+ 
+-static const struct of_device_id display_connector_match[] = {
++static const struct of_device_id display_connector_match[] = { 
+ 	{
+ 		.compatible = "composite-video-connector",
+ 		.data = (void *)DRM_MODE_CONNECTOR_Composite,
 diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
-index a491280ca..f36a117d1 100644
+index a491280ca..355c2d4f9 100644
 --- a/drivers/gpu/drm/drm_edid.c
 +++ b/drivers/gpu/drm/drm_edid.c
-@@ -6913,7 +6913,9 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
+@@ -741,13 +741,13 @@ static const struct drm_display_mode edid_cea_modes_1[] = {
+ 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
+ 	/* 2 - 720x480@60Hz 4:3 */
+-	{ DRM_MODE("720x480", DRM_MODE_TYPE_DRIVER, 27000, 720, 736,
+-		   798, 858, 0, 480, 489, 495, 525, 0,
++	{ DRM_MODE("720x480", DRM_MODE_TYPE_DRIVER, 74250, 720, 736,
++		   798, 1650, 0, 480, 489, 495, 750, 0,
+ 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
+ 	/* 3 - 720x480@60Hz 16:9 */
+-	{ DRM_MODE("720x480", DRM_MODE_TYPE_DRIVER, 27000, 720, 736,
+-		   798, 858, 0, 480, 489, 495, 525, 0,
++	{ DRM_MODE("720x480", DRM_MODE_TYPE_DRIVER, 74250, 720, 736,
++		   798, 1650, 0, 480, 489, 495, 750, 0,
+ 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+ 	/* 4 - 1280x720@60Hz 16:9 */
+@@ -823,13 +823,13 @@ static const struct drm_display_mode edid_cea_modes_1[] = {
+ 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+ 	/* 17 - 720x576@50Hz 4:3 */
+-	{ DRM_MODE("720x576", DRM_MODE_TYPE_DRIVER, 27000, 720, 732,
+-		   796, 864, 0, 576, 581, 586, 625, 0,
++	{ DRM_MODE("720x576", DRM_MODE_TYPE_DRIVER, 74250, 720, 732,
++		   796, 1980, 0, 576, 581, 586, 750, 0,
+ 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
+ 	/* 18 - 720x576@50Hz 16:9 */
+-	{ DRM_MODE("720x576", DRM_MODE_TYPE_DRIVER, 27000, 720, 732,
+-		   796, 864, 0, 576, 581, 586, 625, 0,
++	{ DRM_MODE("720x576", DRM_MODE_TYPE_DRIVER, 74250, 720, 732,
++		   796, 1980, 0, 576, 581, 586, 750, 0,
+ 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+ 	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_16_9, },
+ 	/* 19 - 1280x720@50Hz 16:9 */
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 341550199..2bff93eea 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -260,11 +260,17 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
+ 	bool exact_match = hdmi->plat_data->phy_force_vendor;
+ 	int i;
  
- 	update_display_info(connector, drm_edid);
++	// printk("[DW_HDMI]%s,%d: exact_match=%d, pclk=%d\n", __func__, __LINE__, exact_match, pclk);
++	printk("\n[DW_HDMI]%s,%d: clock=%d, hdisplay=%d, vdisplay=%d\n", __func__, __LINE__, mode->clock * 1000, mode->hdisplay, mode->vdisplay);
+ 	if (hdmi->ref_clk) {
+ 		int rpclk = clk_round_rate(hdmi->ref_clk, pclk);
  
--	return _drm_edid_connector_add_modes(connector, drm_edid);
-+	int edid_mode = _drm_edid_connector_add_modes(connector, drm_edid);
-+	printk("INFO: %s,%d: edid_mode=%d\n", __func__, __LINE__, edid_mode);
-+	return edid_mode;//_drm_edid_connector_add_modes(connector, drm_edid);
- }
- EXPORT_SYMBOL(drm_add_edid_modes);
- 
-@@ -6962,6 +6964,7 @@ int drm_add_modes_noedid(struct drm_connector *connector,
- 			num_modes++;
- 		}
+-		if (abs(rpclk - pclk) > pclk / 1000)
++		printk("[DW_HDMI]%s,%d: rpclk=%d, pclk=%d ", __func__, __LINE__, rpclk, pclk);
++		if (abs(rpclk - pclk) > pclk / 1000) {
++			printk("=> Failed: NOCLOCK\n");
+ 			return MODE_NOCLOCK;
++		}
++		printk("=> OK\n");
  	}
-+	printk("INFO: %s,%d: num_modes=%d\n", __func__, __LINE__, num_modes);
- 	return num_modes;
+ 
+ 	for (i = 0; mpll_cfg[i].mpixelclock != (~0UL); i++) {
+@@ -272,16 +278,22 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
+ 		 * For vendor specific phys force an exact match of the pixelclock
+ 		 * to preserve the original behaviour of the driver.
+ 		 */
+-		if (exact_match && pclk == mpll_cfg[i].mpixelclock)
++		if (exact_match && pclk == mpll_cfg[i].mpixelclock) {
++			printk("[DW_HDMI]%s,%d: AAA <%d>pclk=%d, mpixelclock=%ld => OK\n", __func__, __LINE__, i, pclk, mpll_cfg[i].mpixelclock);
+ 			return MODE_OK;
++		}
++
+ 		/*
+ 		 * The Synopsys phy can work with pixelclocks up to the value given
+ 		 * in the corresponding mpll_cfg entry.
+ 		 */
+-		if (!exact_match && pclk <= mpll_cfg[i].mpixelclock)
++		if (!exact_match && pclk <= mpll_cfg[i].mpixelclock) {
++			printk("[DW_HDMI]%s,%d: BBB <%d>pclk=%d, mpixelclock=%ld => OK\n", __func__, __LINE__, i, pclk, mpll_cfg[i].mpixelclock);
+ 			return MODE_OK;
++		}
+ 	}
+ 
++	printk("[DW_HDMI]%s,%d: pclk=%d => Failed\n", __func__, __LINE__, pclk);
+ 	return MODE_BAD;
  }
- EXPORT_SYMBOL(drm_add_modes_noedid);
+ 
 diff --git a/drivers/video/fbdev/core/fbmon.c b/drivers/video/fbdev/core/fbmon.c
-index 79e5bfbdd..fc17f2e80 100644
+index 79e5bfbdd..bc5967e4a 100644
 --- a/drivers/video/fbdev/core/fbmon.c
 +++ b/drivers/video/fbdev/core/fbmon.c
-@@ -39,7 +39,8 @@
+@@ -39,9 +39,10 @@
   * EDID parser
   */
  
@@ -33,5 +111,120 @@ index 79e5bfbdd..fc17f2e80 100644
 +//#undef DEBUG  /* define this for verbose EDID parsing output */
 +#define DEBUG
  
- #ifdef DEBUG
+-#ifdef DEBUG
++#if 1//def DEBUG
  #define DPRINTK(fmt, args...) printk(fmt,## args)
+ #else
+ #define DPRINTK(fmt, args...) no_printk(fmt, ##args)
+@@ -621,6 +622,7 @@ static struct fb_videomode *fb_create_modedb(unsigned char *edid, int *dbsize,
+ 	int num = 0, i, first = 1;
+ 	int ver, rev;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	mode = kcalloc(50, sizeof(struct fb_videomode), GFP_KERNEL);
+ 	if (mode == NULL)
+ 		return NULL;
+@@ -697,6 +699,7 @@ static int fb_get_monitor_limits(unsigned char *edid, struct fb_monspecs *specs)
+ 	int i, retval = 1;
+ 	unsigned char *block;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	block = edid + DETAILED_TIMING_DESCRIPTIONS_START;
+ 
+ 	DPRINTK("      Monitor Operating Limits: ");
+@@ -779,6 +782,7 @@ static void get_monspecs(unsigned char *edid, struct fb_monspecs *specs)
+ 
+ 	block = edid + EDID_STRUCT_DISPLAY;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	fb_get_monitor_limits(edid, specs);
+ 
+ 	c = block[0] & 0x80;
+@@ -896,6 +900,7 @@ int fb_parse_edid(unsigned char *edid, struct fb_var_screeninfo *var)
+ 	int i;
+ 	unsigned char *block;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	if (edid == NULL || var == NULL)
+ 		return 1;
+ 
+@@ -939,6 +944,7 @@ void fb_edid_to_monspecs(unsigned char *edid, struct fb_monspecs *specs)
+ 	unsigned char *block;
+ 	int i, found = 0;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	if (edid == NULL)
+ 		return;
+ 
+@@ -1044,6 +1050,7 @@ static u32 fb_get_vblank(u32 hfreq)
+ {
+ 	u32 vblank;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	vblank = (hfreq * FLYBACK)/1000;
+ 	vblank = (vblank + 500)/1000;
+ 	return (vblank + V_FRONTPORCH);
+@@ -1073,6 +1080,7 @@ static u32 fb_get_hblank_by_hfreq(u32 hfreq, u32 xres)
+ {
+ 	u32 c_val, m_val, duty_cycle, hblank;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	c_val = (((H_OFFSET - H_SCALEFACTOR) * H_BLANKSCALE)/256 +
+ 		 H_SCALEFACTOR) * 1000;
+ 	m_val = (H_BLANKSCALE * H_GRADIENT)/256;
+@@ -1106,6 +1114,7 @@ static u32 fb_get_hblank_by_dclk(u32 dclk, u32 xres)
+ {
+ 	u32 duty_cycle, h_period, hblank;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	dclk /= 1000;
+ 	h_period = 100 - C_VAL;
+ 	h_period *= h_period;
+@@ -1140,6 +1149,7 @@ static u32 fb_get_hfreq(u32 vfreq, u32 yres)
+ {
+ 	u32 divisor, hfreq;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	divisor = (1000000 - (vfreq * FLYBACK))/1000;
+ 	hfreq = (yres + V_FRONTPORCH) * vfreq  * 1000;
+ 	return (hfreq/divisor);
+@@ -1219,6 +1229,7 @@ int fb_get_mode(int flags, u32 val, struct fb_var_screeninfo *var, struct fb_inf
+ 	u32 hfmin, hfmax, vfmin, vfmax, dclkmin, dclkmax, err = 0;
+ 
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	timings = kzalloc(sizeof(struct __fb_timings), GFP_KERNEL);
+ 
+ 	if (!timings)
+@@ -1313,6 +1324,7 @@ int fb_videomode_from_videomode(const struct videomode *vm,
+ {
+ 	unsigned int htotal, vtotal;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	fbmode->xres = vm->hactive;
+ 	fbmode->left_margin = vm->hback_porch;
+ 	fbmode->right_margin = vm->hfront_porch;
+@@ -1414,6 +1426,7 @@ void fb_destroy_modedb(struct fb_videomode *modedb)
+ int fb_get_mode(int flags, u32 val, struct fb_var_screeninfo *var,
+ 		struct fb_info *info)
+ {
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	return -EINVAL;
+ }
+ #endif /* CONFIG_FB_MODE_HELPERS */
+@@ -1435,6 +1448,7 @@ int fb_validate_mode(const struct fb_var_screeninfo *var, struct fb_info *info)
+ 	u32 hfreq, vfreq, htotal, vtotal, pixclock;
+ 	u32 hfmin, hfmax, vfmin, vfmax, dclkmin, dclkmax;
+ 
++	printk("<MZQ>%s,%d\n", __func__, __LINE__);
+ 	/*
+ 	 * If monspecs are invalid, use values that are enough
+ 	 * for 640x480@60
+@@ -1465,6 +1479,7 @@ int fb_validate_mode(const struct fb_var_screeninfo *var, struct fb_info *info)
+ 	vtotal = var->yres + var->lower_margin + var->vsync_len +
+ 		var->upper_margin;
+ 
++	printk("<MZQ>%s,%d: xres=%d, yres=%d\n", __func__, __LINE__, var->xres, var->yres);
+ 	if (var->vmode & FB_VMODE_INTERLACED)
+ 		vtotal /= 2;
+ 	if (var->vmode & FB_VMODE_DOUBLE)
